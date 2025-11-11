@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LED Board System - Adamson University</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div id="loginPage" class="auth-page">
+  <button class="theme-btn-auth" onclick="toggleTheme()"></button>
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>🚦 LED Board System</h2>
+      <p>Traffic Management & Optimization</p>
+    </div>
+    <form onsubmit="event.preventDefault(); login();">
+      <div class="form-group">
+        <label>Email</label>
+        <input id="loginUser" type="email" placeholder="Enter email" required>
+      </div>
+      <button type="submit" class="btn-primary">Login</button>
+    </form>
+    <div class="auth-link">
+      Don't have an account? <a onclick="showRegister()">Register here</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REGISTRATION PAGE ===== -->
+<div id="registerPage" class="auth-page hidden">
+  <button class="theme-btn-auth" onclick="toggleTheme()"></button>
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Create Admin Account</h2>
+      <p>Join the LED Board System</p>
+    </div>
+    <form onsubmit="event.preventDefault(); register();">
+      <div class="form-group">
+        <label>Email</label>
+        <input id="regUser" type="email" placeholder="Choose email" required>
+      </div>
+      <button type="submit" class="btn-primary">Register</button>
+    </form>
+    <div class="auth-link">
+      Already have an account? <a onclick="showLogin()">Login here</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 2FA VERIFICATION PAGE ===== -->
+<div id="twoFAPage" class="auth-page hidden">
+  <button class="theme-btn-auth" onclick="toggleTheme()"></button>
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Verify Registration</h2>
+      <p>Enter the code to complete setup</p>
+    </div>
+    <div class="verification-section">
+      <p class="verification-label" id="codeDisplay">Check your inbox (and spam). Enter the 6-digit code below.</p>
+    </div>
+    <form onsubmit="event.preventDefault(); verify2FA();">
+      <div class="form-group">
+        <label>Enter Code</label>
+        <input id="twoFAInput" type="text" maxlength="6" placeholder="000000" required>
+      </div>
+      <button type="submit" class="btn-primary">Verify & Complete</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== MAIN APPLICATION ===== -->
+<div id="appWrapper" class="page-wrapper hidden">
+  
+  <!-- VERTICAL SIDEBAR NAVIGATION -->
+  <nav class="sidebar-nav">
+    <button class="sidebar-logo" onclick="switchPage('live')">
+      <img src="C:\Users\Rai\Desktop\website\images\adamson-logo.png.png" 
+           alt="Adamson Logo" class="adamson-logo-img">
+    </button>
+    
+    <div class="sidebar-menu">
+      <a class="sidebar-item active" onclick="switchPage('live')">
+        <span class="sidebar-icon">📷</span>
+        <span class="sidebar-label">Live</span>
+      </a>
+      <a class="sidebar-item" onclick="switchPage('analytics')">
+        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-label">Analytics</span>
+      </a>
+      <a class="sidebar-item" onclick="switchPage('scenarios')">
+        <span class="sidebar-icon">⚙️</span>
+        <span class="sidebar-label">Scenarios</span>
+      </a>
+      <a class="sidebar-item" onclick="switchPage('archive')">
+        <span class="sidebar-icon">📁</span>
+        <span class="sidebar-label">Archive</span>
+      </a>
+      <a class="sidebar-item" onclick="switchPage('help')">
+        <span class="sidebar-icon">❓</span>
+        <span class="sidebar-label">Help</span>
+      </a>
+      <a class="sidebar-item" onclick="switchPage('about')">
+        <span class="sidebar-icon">ℹ️</span>
+        <span class="sidebar-label">About</span>
+      </a>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button class="sidebar-item" onclick="toggleTheme()">
+        <span class="sidebar-icon theme-btn">🌙</span>
+        <span class="sidebar-label">Theme</span>
+      </button>
+      <a class="sidebar-item logout-sidebar" onclick="logout()">
+        <span class="sidebar-icon">🚪</span>
+        <span class="sidebar-label">Logout</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- TOP HEADER -->
+  <header class="top-header">
+    <h1 class="header-title">🚦 LED Board System - Adamson University</h1>
+    <div class="header-user">
+      <span id="headerUsername">User</span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    
+    <!-- ===== LIVE MONITORING PAGE ===== -->
+    <div id="livePage" class="live active">
+      <h2 class="page-title">📷 Live Monitoring</h2>
+
+      <!-- CAMERAS GRID -->
+      <div class="cameras-grid">
+        
+        <!-- Pedestrian Camera -->
+        <div class="camera-card">
+          <div class="camera-header">
+            <h3>📷 Pedestrian Camera</h3>
+          </div>
+          <div class="camera-feed">
+            <div class="camera-feed-label">
+              <p>Pedestrian Detection Zone</p>
+              <small>30 FPS • 95% Confidence</small>
+            </div>
+          </div>
+          <div class="camera-info">
+            <div class="info-row">
+              <span class="info-label">Detections:</span>
+              <span class="info-value">25</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Status:</span>
+              <span class="info-value">Active</span>
+            </div>
+          </div>
+          <div class="camera-settings">
+            <div class="setting-control">
+              <span class="setting-label">Brightness</span>
+              <div class="slider-wrapper">
+                <input type="range" id="ped-brightness-slider" min="0" max="100" value="50" oninput="updateSlider(this)">
+              </div>
+              <span class="value-display" id="ped-brightness-value">50%</span>
+              <button class="btn-reset" onclick="resetSlider('ped-brightness-slider', 'ped-brightness-value')">↻</button>
+            </div>
+            <div class="setting-control">
+              <span class="setting-label">Contrast</span>
+              <div class="slider-wrapper">
+                <input type="range" id="ped-contrast-slider" min="0" max="100" value="50" oninput="updateSlider(this)">
+              </div>
+              <span class="value-display" id="ped-contrast-value">50%</span>
+              <button class="btn-reset" onclick="resetSlider('ped-contrast-slider', 'ped-contrast-value')">↻</button>
+            </div>
+            <div class="setting-control">
+              <span class="setting-label">Sensitivity</span>
+              <select>
+                <option>Low</option>
+                <option selected>Medium</option>
+                <option>High</option>
+              </select>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vehicle Camera -->
+        <div class="camera-card">
+          <div class="camera-header">
+            <h3>📷 Vehicle Camera</h3>
+          </div>
+          <div class="camera-feed">
+            <div class="camera-feed-label">
+              <p>Vehicle Detection Zone</p>
+              <small>30 FPS • 92% Confidence</small>
+            </div>
+          </div>
+          <div class="camera-info">
+            <div class="info-row">
+              <span class="info-label">Detections:</span>
+              <span class="info-value">15</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Avg Speed:</span>
+              <span class="info-value">28 km/h</span>
+            </div>
+          </div>
+          <div class="camera-settings">
+            <div class="setting-control">
+              <span class="setting-label">Brightness</span>
+              <div class="slider-wrapper">
+                <input type="range" id="veh-brightness-slider" min="0" max="100" value="55" oninput="updateSlider(this)">
+              </div>
+              <span class="value-display" id="veh-brightness-value">55%</span>
+              <button class="btn-reset" onclick="resetSlider('veh-brightness-slider', 'veh-brightness-value')">↻</button>
+            </div>
+            <div class="setting-control">
+              <span class="setting-label">Contrast</span>
+              <div class="slider-wrapper">
+                <input type="range" id="veh-contrast-slider" min="0" max="100" value="45" oninput="updateSlider(this)">
+              </div>
+              <span class="value-display" id="veh-contrast-value">45%</span>
+              <button class="btn-reset" onclick="resetSlider('veh-contrast-slider', 'veh-contrast-value')">↻</button>
+            </div>
+            <div class="setting-control">
+              <span class="setting-label">Sensitivity</span>
+              <select>
+                <option>Low</option>
+                <option selected>Medium</option>
+                <option>High</option>
+              </select>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Traffic Light Camera -->
+        <div class="camera-card">
+          <div class="camera-header">
+            <h3>📷 Traffic Light Camera</h3>
+          </div>
+          <div class="camera-feed">
+            <div class="camera-feed-label">
+              <p>Signal Detection Zone</p>
+              <small>30 FPS • 98% Confidence</small>
+            </div>
+          </div>
+          <div class="camera-info">
+            <div class="info-row">
+              <span class="info-label">Current Signal:</span>
+              <span class="info-value">🟢 GREEN</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Status:</span>
+              <span class="info-value">Normal</span>
+            </div>
+          </div>
+          <div class="camera-settings">
+            <div class="setting-control">
+              <span class="setting-label">Brightness</span>
+              <div class="slider-wrapper">
+                <input type="range" id="light-brightness-slider" min="0" max="100" value="60" oninput="updateSlider(this)">
+              </div>
+              <span class="value-display" id="light-brightness-value">60%</span>
+              <button class="btn-reset" onclick="resetSlider('light-brightness-slider', 'light-brightness-value')">↻</button>
+            </div>
+            <div class="setting-control">
+              <span class="setting-label">Contrast</span>
+              <div class="slider-wrapper">
+                <input type="range" id="light-contrast-slider" min="0" max="100" value="55" oninput="updateSlider(this)">
+              </div>
+              <span class="value-display" id="light-contrast-value">55%</span>
+              <button class="btn-reset" onclick="resetSlider('light-contrast-slider', 'light-contrast-value')">↻</button>
+            </div>
+            <div class="setting-control">
+              <span class="setting-label">Sensitivity</span>
+              <select>
+                <option>Low</option>
+                <option>Medium</option>
+                <option selected>High</option>
+              </select>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- SCENARIOS SECTION -->
+      <div class="scenarios-section">
+        <h2>🎯 Scenario Management</h2>
+        <p class="scenarios-desc">Select multiple scenarios - all can be active simultaneously across 3 zones</p>
+        <div class="scenarios-grid">
+          <div class="scenario-card">
+            <input type="checkbox" onchange="updateScenario()">
+            <div class="scenario-info">
+              <div class="scenario-name">👥 Pedestrian Priority</div>
+              <div class="scenario-trigger">Pedestrian count > 30</div>
+            </div>
+          </div>
+          <div class="scenario-card">
+            <input type="checkbox" onchange="updateScenario()">
+            <div class="scenario-info">
+              <div class="scenario-name">🚗 Vehicle Priority</div>
+              <div class="scenario-trigger">Vehicle count > 20</div>
+            </div>
+          </div>
+          <div class="scenario-card">
+            <input type="checkbox" onchange="updateScenario()">
+            <div class="scenario-info">
+              <div class="scenario-name">🚨 Emergency Vehicle</div>
+              <div class="scenario-trigger">Emergency detected</div>
+            </div>
+          </div>
+          <div class="scenario-card">
+            <input type="checkbox" onchange="updateScenario()">
+            <div class="scenario-info">
+              <div class="scenario-name">🚔 Marshall Override</div>
+              <div class="scenario-trigger">Congestion (40+) + Marshall signal</div>
+            </div>
+          </div>
+          <div class="scenario-card">
+            <input type="checkbox" onchange="updateScenario()">
+            <div class="scenario-info">
+              <div class="scenario-name">🚔 Marshal Safe Crossing</div>
+              <div class="scenario-trigger">Marshall signal + No vehicles</div>
+            </div>
+          </div>
+          <div class="scenario-card">
+            <input type="checkbox" onchange="updateScenario()">
+            <div class="scenario-info">
+              <div class="scenario-name">⚡ Baseline</div>
+              <div class="scenario-trigger">Normal operation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ANALYTICS PAGE ===== -->
+    <div id="analyticsPage" class="content-page">
+      <h2 class="page-title">📈 Analytics Dashboard</h2>
+      
+      <div class="analytics-stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Avg Pedestrians</div>
+          <div class="stat-value" id="statAvgPed">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Vehicles</div>
+          <div class="stat-value" id="statAvgVeh">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Peak Pedestrians</div>
+          <div class="stat-value" id="statPeakPed">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Peak Vehicles</div>
+          <div class="stat-value" id="statPeakVeh">0</div>
+        </div>
+      </div>
+
+      <div class="analytics-controls">
+        <button class="chart-btn active" onclick="setAnalyticsTimeRange('hour')">Last Hour</button>
+        <button class="chart-btn" onclick="setAnalyticsTimeRange('6hours')">6 Hours</button>
+        <button class="chart-btn" onclick="setAnalyticsTimeRange('24hours')">24 Hours</button>
+        <button class="chart-btn" onclick="setChartType('line')">Line</button>
+        <button class="chart-btn" onclick="setChartType('bar')">Bar</button>
+        <button class="chart-btn" onclick="exportAnalyticsCSV()">Export CSV</button>
+      </div>
+
+      <div class="analytics-chart-card">
+        <h3>Traffic Density (Last 10 minutes)</h3>
+        <canvas id="densityChart"></canvas>
+      </div>
+    </div>
+
+    <!-- ===== SCENARIOS PAGE ===== -->
+    <div id="scenariosPage" class="content-page">
+      <h2 class="page-title">🎯 Detailed Scenario Management</h2>
+      
+      <div class="scenarios-description-card">
+        <h2>📋 About This Page</h2>
+        <p>The Scenario Management system allows you to control traffic light behavior based on real-time conditions detected by AI cameras. You can activate multiple scenarios simultaneously to optimize traffic flow across the intersection at Adamson University San Marcelino St.</p>
+        <p><strong>How It Works:</strong></p>
+        <ul>
+          <li>Each scenario represents a specific traffic condition</li>
+          <li>Toggle scenarios ON/OFF to activate different LED board messages</li>
+          <li>Multiple scenarios can be active at the same time</li>
+          <li>The system prioritizes based on active scenarios and vehicle/pedestrian counts</li>
+          <li>All changes are sent to the LED boards in real-time</li>
+        </ul>
+      </div>
+
+      <div class="warnings-container">
+        <div class="warning-card warning-info">
+          <div class="warning-icon">ℹ️</div>
+          <div class="warning-content">
+            <h3>Multiple Activations</h3>
+            <p>You can activate multiple scenarios at once. Priority is determined by the system based on current traffic conditions and configured rules.</p>
+          </div>
+        </div>
+        <div class="warning-card warning-caution">
+          <div class="warning-icon">⚠️</div>
+          <div class="warning-content">
+            <h3>Marshall Override Priority</h3>
+            <p>When Marshall Override is active, all vehicle lights will turn RED immediately. Ensure marshalls are in position before activation to avoid traffic disruption.</p>
+          </div>
+        </div>
+        <div class="warning-card warning-danger">
+          <div class="warning-icon">🚨</div>
+          <div class="warning-content">
+            <h3>Emergency Vehicle Protocol</h3>
+            <p>Emergency Vehicle scenario overrides all other scenarios. This will immediately clear vehicle lanes. Only activate if emergency vehicle is present.</p>
+          </div>
+        </div>
+        <div class="warning-card warning-success">
+          <div class="warning-icon">✅</div>
+          <div class="warning-content">
+            <h3>Baseline Operation</h3>
+            <p>Baseline mode runs the standard traffic light cycle without AI-driven modifications. Use this for normal peak hours or maintenance periods.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text-primary);">🎚️ Available Scenarios</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Select multiple scenarios - all can be active simultaneously across 3 zones</p>
+      
+      <div id="scenarioCardsGrid" class="scenarios-detailed-grid">
+        <!-- Dynamically populated by JavaScript -->
+      </div>
+    </div>
+
+    <!-- ===== ARCHIVE PAGE ===== -->
+    <div id="archivePage" class="content-page">
+      <h2 class="page-title">📋 System Logs & Archive</h2>
+      
+      <div style="margin-bottom: 1rem; display: flex; gap: 1rem;">
+        <button class="chart-btn" onclick="loadArchive(200)">Refresh</button>
+        <button class="chart-btn" onclick="deleteSelected()">Clear Selected</button>
+        <button class="chart-btn" onclick="clearAll()">Clear All</button>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th><input type="checkbox" onchange="toggleSelectAll(this)"></th>
+              <th>Time</th>
+              <th>Event</th>
+              <th>Status (Boards)</th>
+            </tr>
+          </thead>
+          <tbody id="archiveLogBody">
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--text-secondary);">Loading logs...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== HELP PAGE ===== -->
+    <div id="helpPage" class="content-page">
+      <div class="page-header">
+        <h2 class="page-title">📖 Help & Documentation</h2>
+      </div>
+
+      <div class="help-wrapper">
+        <div class="help-sidebar">
+          <ul>
+            <li><a class="help-link active" onclick="showHelpSection('getting-started')">🚀 Getting Started</a></li>
+            <li><a class="help-link" onclick="showHelpSection('features')">✨ Features</a></li>
+            <li><a class="help-link" onclick="showHelpSection('cameras')">📷 Cameras</a></li>
+            <li><a class="help-link" onclick="showHelpSection('scenarios')">🎯 Scenarios</a></li>
+            <li><a class="help-link" onclick="showHelpSection('analytics')">📊 Analytics</a></li>
+            <li><a class="help-link" onclick="showHelpSection('support')">💬 Support</a></li>
+          </ul>
+        </div>
+        <div class="help-content" id="helpContent">
+          <h3>🚀 Getting Started</h3>
+          <p>Welcome to the LED Board System! This application manages traffic lights using AI detection.</p>
+          <p><strong>Quick Start:</strong></p>
+          <ul>
+            <li>Login with your admin credentials</li>
+            <li>View 3 camera feeds on the Live page</li>
+            <li>Adjust brightness, contrast, and sensitivity</li>
+            <li>Activate scenarios as needed</li>
+            <li>Monitor real-time data in Analytics</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT PAGE ===== -->
+    <div id="aboutPage" class="content-page">
+      <h2 class="page-title">ℹ️ About LED Board System</h2>
+      
+      <div class="about-cards-grid">
+        <div class="about-card">
+          <h3>🏢 System Overview</h3>
+          <p><strong>Project:</strong> LED Board Optimization<br>
+          <strong>Version:</strong> Production<br>
+          <strong>Institution:</strong> Adamson University</p>
+        </div>
+        <div class="about-card">
+          <h3>📖 Description</h3>
+          <p>AI-powered traffic management system with real-time pedestrian and vehicle detection, marshall integration, and LED board optimization.</p>
+        </div>
+        <div class="about-card">
+          <h3>⚙️ Technical Specs</h3>
+          <p><strong>• 3 Camera Zones</strong><br>
+          <strong>• 6 Scenarios</strong><br>
+          <strong>• Unlimited Activation</strong><br>
+          <strong>• Real-Time AI</strong></p>
+        </div>
+        <div class="about-card">
+          <h3>✨ Capabilities</h3>
+          <p><strong>• Pedestrian Tracking</strong><br>
+          <strong>• Vehicle Detection</strong><br>
+          <strong>• Signal Recognition</strong><br>
+          <strong>• Marshall Integration</strong></p>
+        </div>
+        <div class="about-card">
+          <h3>👥 Team</h3>
+          <p>Abante, De Oro, Tan, Zanita<br>
+          With Faculty Advisors</p>
+        </div>
+        <div class="about-card">
+          <h3>🚀 Status</h3>
+          <p><strong>Status:</strong> Operational<br>
+          <strong>Uptime:</strong> 99.9%</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
